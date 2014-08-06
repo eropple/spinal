@@ -56,7 +56,7 @@ object JSON extends StrictLogging {
     }
 
     implicit val httpRoutableReads: Reads[HTTPRoutable] = (
-      (JsPath \ "host").read[String] and
+      (JsPath \ "path").read[String] and
       (JsPath \ "sourcePort").read[Int] and
       (JsPath \ "endpoints").read[Seq[Endpoint]]
     )(HTTPRoutable.apply _)

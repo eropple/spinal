@@ -15,6 +15,6 @@ case class TCPRoutable(sourcePort: Int, endpoints: Seq[Endpoint]) extends Routab
 case class UDPRoutable(sourcePort: Int, endpoints: Seq[Endpoint]) extends Routable {
   def routableType = "udp"
 }
-case class HTTPRoutable(host: String, sourcePort: Int, endpoints: Seq[Endpoint]) extends Routable {
+case class HTTPRoutable(path: String, sourcePort: Int, endpoints: Seq[Endpoint]) extends Routable {
   def routableType = "http"
 }
