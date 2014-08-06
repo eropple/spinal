@@ -52,6 +52,9 @@ But! Getting there. The core architecture makes a lot of sense to me and it's ju
 ## Contributing ##
 `spinal` is still very early in development. If the idea of a scalable, generic routing system tickles your fancy, though, and you'd like to help out, feel free to get in touch.
 
+## Thanks To ##
+- **Localytics**, my employer and the reason behind the existence of the `extensions/ec2` stuff.
+
 —Ed Ropple ([@edropple](), ed+spinal@edropple.com)
 
 
