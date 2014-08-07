@@ -19,7 +19,7 @@ trait Discoverer extends BaseActor[LeaderConfiguration] {
   }
 
   def mergeRoutes(routes: Seq[_ <: Routable]): Universe = {
-    routes.filter(_.isInstanceOf[HTTPRoutable])
+    val http: Seq[HTTPRoutable] = routes.filter(_.isInstanceOf[HTTPRoutable]).map(_.asInstanceOf[HTTPRoutable]).toSeq
 
     Universe(Map())
   }

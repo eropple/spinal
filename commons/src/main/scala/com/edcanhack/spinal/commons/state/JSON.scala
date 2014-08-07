@@ -14,7 +14,7 @@ object JSON extends StrictLogging {
     implicit val routableWrites = new Writes[Routable] {
       override def writes(o: Routable): JsValue = o match {
         case r: HTTPRoutable => httpRoutableWrites.writes(r)
-        case r: Routable => catchallRoutableWrites.writes(r)
+        case r: Routable => ???
       }
     }
 
@@ -22,14 +22,6 @@ object JSON extends StrictLogging {
       override def writes(o: HTTPRoutable): JsValue = Json.obj(
         "type" -> "http",
         "path" -> o.path,
-        "sourcePort" -> o.sourcePort,
-        "endpoints" -> o.endpoints.map(e => endpointWrites.writes(e))
-      )
-    }
-
-    implicit val catchallRoutableWrites: Writes[Routable] = new Writes[Routable] {
-      override def writes(o: Routable): JsValue = Json.obj(
-        "type" -> o.routableType,
         "sourcePort" -> o.sourcePort,
         "endpoints" -> o.endpoints.map(e => endpointWrites.writes(e))
       )
