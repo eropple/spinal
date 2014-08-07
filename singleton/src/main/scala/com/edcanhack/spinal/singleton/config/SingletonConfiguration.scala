@@ -2,8 +2,6 @@ package com.edcanhack.spinal.singleton.config
 
 import com.edcanhack.spinal.commons.config.specs.{LocatorSpec, SelfLocatorSpec}
 import com.edcanhack.spinal.commons.config.{ConfigurationParameters, ConfigErrors, ConfigOk, ConfigResponse}
-import com.edcanhack.spinal.commons.state.Universe
-import com.edcanhack.spinal.commons.state.Universe.NormalMerge
 import com.edcanhack.spinal.leader.config.specs.{AkkaPublisherSpec, ElectorSpec, LeaderObserverSpec, SolitaryElectorSpec}
 import com.edcanhack.spinal.leader.config.{LeaderConfiguration, LeaderParametersBase}
 import com.edcanhack.spinal.worker.config.specs.{AkkaSubscriberSpec, EffectorSpec, WorkerObserverSpec}
@@ -42,5 +40,5 @@ trait SingletonConfiguration extends LeaderConfiguration with WorkerConfiguratio
 }
 
 trait SingletonParametersBase extends ConfigurationParameters with LeaderParametersBase with WorkerParametersBase
-case class SingletonParameters(universeMergeType: Universe.MergeType = NormalMerge)
+case class SingletonParameters()
   extends SingletonParametersBase

@@ -28,7 +28,7 @@ case class DiscovererBoss(config: LeaderConfiguration) extends BaseActor[LeaderC
 
       reports = reports.+( (sender().path.toStringWithoutAddress, report) )
 
-      val merged = reports.values.toSeq.sortBy(r => r.weight).foldLeft(Universe.empty)( (a, c) => a.merge(c.universe, config.parameters.universeMergeType) )
+      val merged = reports.values.toSeq.sortBy(r => r.weight).foldLeft(Universe.empty)( (a, c) => a.merge(c.universe) )
 
       context.actorSelection("../publishers/*") ! Messages.Leader.Publisher.Publish(merged)
     }
