@@ -35,7 +35,7 @@ class EC2TagDiscoverer(val config: LeaderConfiguration, val priority: Int,
   }
 
 
-  protected def processInstances(instance: Instance): Seq[Routable] = {
+  protected def processInstances(instance: Instance): Seq[_ >: Routable] = {
     try {
       instance.getTags.find(_.getKey == routingTagName) match {
         case None => Seq()
@@ -49,5 +49,5 @@ class EC2TagDiscoverer(val config: LeaderConfiguration, val priority: Int,
     }
   }
 
-  protected def processRoutingTag(instance: Instance, content: String): Seq[Routable] = ???
+  protected def processRoutingTag(instance: Instance, content: String): Seq[_ >: Routable] = ???
 }

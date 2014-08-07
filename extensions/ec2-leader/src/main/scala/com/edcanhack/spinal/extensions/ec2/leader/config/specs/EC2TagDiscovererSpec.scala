@@ -12,7 +12,7 @@ case class EC2TagDiscovererSpec(priority: Int,
                                 dieOnFail: Boolean = false) extends DiscovererSpec {
   override def initializeDiscoverer(factory: ActorRefFactory, configuration: LeaderConfiguration, actorIdx: Long): ActorRef = {
     factory.actorOf(Props(classOf[EC2TagDiscoverer],
-                          configuration, priority, ec2Credentials, routingTagName, dieOnFail),
-                    s"${actorIdx}-EC2TagDiscoverer")
+      configuration, priority, ec2Credentials, routingTagName, dieOnFail),
+      s"${actorIdx}-EC2TagDiscoverer")
   }
 }

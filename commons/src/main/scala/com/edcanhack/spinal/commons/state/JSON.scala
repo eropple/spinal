@@ -21,7 +21,7 @@ object JSON extends StrictLogging {
     implicit val httpRoutableWrites: Writes[HTTPRoutable] = new Writes[HTTPRoutable] {
       override def writes(o: HTTPRoutable): JsValue = Json.obj(
         "type" -> "http",
-        "host" -> o.host,
+        "path" -> o.path,
         "sourcePort" -> o.sourcePort,
         "endpoints" -> o.endpoints.map(e => endpointWrites.writes(e))
       )
