@@ -9,12 +9,6 @@ trait Routable {
   def routableType: String
 }
 
-case class TCPRoutable(sourcePort: Int, endpoints: Seq[Endpoint]) extends Routable {
-  def routableType = "tcp"
-}
-case class UDPRoutable(sourcePort: Int, endpoints: Seq[Endpoint]) extends Routable {
-  def routableType = "udp"
-}
 case class HTTPRoutable(path: String, sourcePort: Int, endpoints: Seq[Endpoint]) extends Routable {
   def routableType = "http"
 }

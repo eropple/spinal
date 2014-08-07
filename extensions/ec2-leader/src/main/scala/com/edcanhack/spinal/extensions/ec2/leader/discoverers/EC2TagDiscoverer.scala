@@ -8,6 +8,7 @@ import com.edcanhack.spinal.commons.state.Routable
 import com.amazonaws.services.ec2.model.{Tag, Instance, DescribeInstancesResult}
 import com.amazonaws.auth.{DefaultAWSCredentialsProviderChain, AWSCredentialsProvider}
 import play.api.libs.json.Json
+import com.edcanhack.spinal.commons.Messages
 
 
 class EC2TagDiscoverer(val config: LeaderConfiguration, val priority: Int,
@@ -21,8 +22,10 @@ class EC2TagDiscoverer(val config: LeaderConfiguration, val priority: Int,
       logger.info(s"Attempting to discover state of EC2 via tag name '${routingTagName}'.")
       val result: DescribeInstancesResult = EC2.describeInstances()
       val instances = result.getReservations.flatMap(r => r.getInstances)
+      val routes = instances.map(i => routesFromInstance(i)).flatten.toSeq
 
-      instances map processInstances
+
+      self ! Messages.Leader.Discoverer.Report(routes)
     } catch {
       case ex: Exception => {
         logger.error(s"Exception received in EC2TagDiscoverer::discover.", ex)
@@ -35,7 +38,7 @@ class EC2TagDiscoverer(val config: LeaderConfiguration, val priority: Int,
   }
 
 
-  protected def processInstances(instance: Instance): Seq[_ >: Routable] = {
+  protected def routesFromInstance(instance: Instance): Seq[_ <: Routable] = {
     try {
       instance.getTags.find(_.getKey == routingTagName) match {
         case None => Seq()
@@ -49,5 +52,5 @@ class EC2TagDiscoverer(val config: LeaderConfiguration, val priority: Int,
     }
   }
 
-  protected def processRoutingTag(instance: Instance, content: String): Seq[_ >: Routable] = ???
+  protected def processRoutingTag(instance: Instance, content: String): Seq[_ <: Routable] = ???
 }

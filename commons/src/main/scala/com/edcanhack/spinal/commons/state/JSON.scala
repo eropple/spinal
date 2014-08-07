@@ -51,7 +51,6 @@ object JSON extends StrictLogging {
     implicit val routableReads: Reads[Routable] = new Reads[Routable] {
       override def reads(json: JsValue): JsResult[Routable] = ((json \ "type").as[String] match {
         case "http" => httpRoutableReads
-        case "tcp" => tcpRoutableReads
       }).reads(json)
     }
 
@@ -60,15 +59,6 @@ object JSON extends StrictLogging {
       (JsPath \ "sourcePort").read[Int] and
       (JsPath \ "endpoints").read[Seq[Endpoint]]
     )(HTTPRoutable.apply _)
-
-    implicit val tcpRoutableReads: Reads[TCPRoutable] = (
-      (JsPath \ "sourcePort").read[Int] and
-      (JsPath \ "endpoints").read[Seq[Endpoint]]
-    )(TCPRoutable.apply _)
-    implicit val udpRoutableReads: Reads[UDPRoutable] = (
-      (JsPath \ "sourcePort").read[Int] and
-      (JsPath \ "endpoints").read[Seq[Endpoint]]
-    )(UDPRoutable.apply _)
 
     implicit val endpointReads: Reads[Endpoint] = (
       (JsPath \ "address").read[String] and
