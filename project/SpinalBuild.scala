@@ -1,7 +1,7 @@
 import sbt._
 import Keys._
 import sbtassembly.Plugin._
-import AssemblyKeys._
+import play.twirl.sbt._
 
 object SpinalBuild extends Build {
   val spinalNameBase = "spinal-"
@@ -20,61 +20,67 @@ object SpinalBuild extends Build {
   )
 
   lazy val commons = Project(id = "commons",
-                             base = file(s"${spinalRoot}/commons"),
-                             settings = spinalGlobalSettings)
-                      .settings(
-                        libraryDependencies ++= SpinalDependencies.commons
-                      )
+    base = file(s"${spinalRoot}/commons"))
+    .settings(spinalGlobalSettings: _*)
+    .settings(
+      libraryDependencies ++= SpinalDependencies.commons
+    )
 
   lazy val leader = Project(id = "leader",
-                            base = file(s"${spinalRoot}/leader"),
-                           settings = spinalGlobalSettings)
-                      .aggregate(commons).dependsOn(commons)
-                      .settings(
-                        libraryDependencies ++= SpinalDependencies.leader
-                      )
+    base = file(s"${spinalRoot}/leader"))
+    .settings(spinalGlobalSettings: _*)
+    .aggregate(commons).dependsOn(commons)
+    .settings(
+      libraryDependencies ++= SpinalDependencies.leader
+    )
 
   lazy val worker = Project(id = "worker",
-                            base = file(s"${spinalRoot}/worker"),
-                           settings = spinalGlobalSettings)
-                      .aggregate(commons).dependsOn(commons)
-                      .settings(
-                        libraryDependencies ++= SpinalDependencies.worker
-                      )
+    base = file(s"${spinalRoot}/worker"))
+    .settings(spinalGlobalSettings: _*)
+    .aggregate(commons).dependsOn(commons)
+    .settings(
+      libraryDependencies ++= SpinalDependencies.worker
+    ).enablePlugins(SbtTwirl)
 
   lazy val singleton = Project(id = "singleton",
-                               base = file(s"${spinalRoot}/singleton"),
-                               settings = spinalGlobalSettings ++ assemblySettings)
-                        .aggregate(worker, leader).dependsOn(worker, leader)
-                        .settings(
-                          libraryDependencies ++= SpinalDependencies.singleton,
-                          mainClass in compile  := Some("com.edcanhack.spinal.singleton.Main"),
-                          mainClass in assembly := Some("com.edcanhack.spinal.singleton.Main")
-                        )
+    base = file(s"${spinalRoot}/singleton"))
+    .settings(spinalGlobalSettings: _*)
+    .aggregate(worker, leader, commons).dependsOn(worker, leader, commons)
+    .settings(assemblySettings: _*)
+    .settings(
+      libraryDependencies ++= SpinalDependencies.singleton,
+      mainClass in Compile := Some("com.edcanhack.spinal.singleton.Main")
+    )
 
   lazy val `ext-ec2-commons` = Project(id = "ext-ec2-commons",
-                                       base = file(s"${spinalRoot}/extensions/ec2-commons"),
-                                      settings = spinalGlobalSettings)
-                                .aggregate(commons).dependsOn(commons)
-                                .settings(
-                                  libraryDependencies ++= SpinalDependencies.ec2Commons
-                                )
+    base = file(s"${spinalRoot}/extensions/ec2-commons"),
+    settings = spinalGlobalSettings)
+    .aggregate(commons).dependsOn(commons)
+    .settings(
+      libraryDependencies ++= SpinalDependencies.ec2Commons
+    )
 
   lazy val `ext-ec2-leader` = Project(id = "ext-ec2-leader",
-                                      base = file(s"${spinalRoot}/extensions/ec2-leader"),
-                                      settings = spinalGlobalSettings)
-                               .aggregate(`ext-ec2-commons`, leader).dependsOn(`ext-ec2-commons`, leader)
-                               .settings (
-                                 libraryDependencies ++= SpinalDependencies.ec2Leader
-                               )
+    base = file(s"${spinalRoot}/extensions/ec2-leader"))
+    .settings(spinalGlobalSettings: _*)
+    .aggregate(`ext-ec2-commons`, leader).dependsOn(`ext-ec2-commons`, leader)
+    .settings(
+    libraryDependencies ++= SpinalDependencies.ec2Leader
+  )
 
   lazy val `ext-ec2-worker` = Project(id = "ext-ec2-worker",
-                                      base = file(s"${spinalRoot}/extensions/ec2-worker"),
-                                      settings = spinalGlobalSettings)
-                                .aggregate(`ext-ec2-commons`, worker).dependsOn(`ext-ec2-commons`, worker)
-                                .settings (
-                                  libraryDependencies ++= SpinalDependencies.ec2Worker
-                                )
+    base = file(s"${spinalRoot}/extensions/ec2-worker"))
+    .settings(spinalGlobalSettings: _*)
+    .aggregate(`ext-ec2-commons`, worker).dependsOn(`ext-ec2-commons`, worker)
+    .settings(
+      libraryDependencies ++= SpinalDependencies.ec2Worker
+    )
+
+  lazy val `ext-haproxy` = Project(id = "ext-haproxy",
+    base = file(s"${spinalRoot}/extensions/haproxy"))
+    .settings(spinalGlobalSettings: _*)
+    .aggregate(worker).dependsOn(worker)
+    .enablePlugins(SbtTwirl)
 }
 
 object SpinalDependencies {
@@ -91,7 +97,13 @@ object SpinalDependencies {
     "org.rogach" %% "scallop" % "0.9.5",
 
     "com.typesafe.akka" %% "akka-actor" % "2.3.4",
-    "com.typesafe.akka" %% "akka-slf4j" % "2.3.4"
+    "com.typesafe.akka" %% "akka-slf4j" % "2.3.4",
+
+    "org.scalaz" %% "scalaz-core" % "7.1.0",
+
+    "com.jsuereth" %% "scala-arm" % "1.3",
+
+    "com.google.guava" % "guava" % "17.0"
   )
   val leader = commons ++ Seq(
     logback
