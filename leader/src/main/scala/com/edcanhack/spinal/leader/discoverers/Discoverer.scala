@@ -8,6 +8,16 @@ import com.edcanhack.spinal.leader.config.LeaderConfiguration
 trait Discoverer extends BaseActor[LeaderConfiguration] {
   def priority: Int
 
+  override def preStart() = {
+    super.preStart()
+    self ! Messages.Leader.Discoverer.StartDiscovery
+  }
+
+  override def preRestart(reason: Throwable, message: Option[Any]) = {
+    super.preRestart(reason, message)
+    self ! Messages.Leader.Discoverer.StartDiscovery
+  }
+
   def receive = {
     case Messages.Leader.Discoverer.StartDiscovery => discover()
     case Messages.Leader.Discoverer.Report(routes: Seq[Routable]) => {

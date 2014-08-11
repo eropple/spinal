@@ -11,4 +11,9 @@ trait BaseActor[TConfigurationType <: Configuration] extends Actor with LazyLogg
     super.preStart()
     logger.info(s"Created on path '${self.path}'.")
   }
+
+  override def preRestart(reason: Throwable, message: Option[Any]): Unit = {
+    super.preRestart(reason, message)
+    logger.info(s"Restarting because of ${reason.getClass.getSimpleName}.")
+  }
 }

@@ -6,6 +6,12 @@ import com.edcanhack.spinal.leader.config.LeaderConfiguration
 
 // TODO: refactor the Boss classes into something easier to deal with
 class LeaderObserverBoss(val config: LeaderConfiguration) extends BaseActor[LeaderConfiguration] {
+
+  override def preStart() = {
+    super.preStart()
+    self ! Messages.Leader.Boss.Initialize
+  }
+
   def receive = {
     case Messages.Leader.Boss.Initialize => {
       logger.info(s"Creating ${config.leaderObservers.size} observers...")

@@ -13,15 +13,15 @@ case class DiscovererBoss(config: LeaderConfiguration) extends BaseActor[LeaderC
 
   var reports: Map[String, DiscoveryReport] = Map()
 
+  override def preStart() = {
+    super.preStart()
+    self ! Initialize
+  }
+
   def receive = {
     case Initialize => {
       logger.info(s"Creating ${config.discoverers.size} discoverers...")
       config.discoverers.view.zipWithIndex.foreach { case (o, i) => o.initializeDiscoverer(context, config, i) }
-
-      if (config.discoverers.size > 0) {
-        logger.debug("Starting discovery.")
-        context.actorSelection("*") ! Messages.Leader.Discoverer.StartDiscovery
-      }
     }
     case report: DiscoveryReport => {
       logger.debug(s"Report received from ${sender().path.toStringWithoutAddress}.")
