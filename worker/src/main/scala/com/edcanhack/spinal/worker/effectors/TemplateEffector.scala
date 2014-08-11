@@ -14,11 +14,10 @@ import com.google.common.io.ByteStreams
 class TemplateEffector(val config: WorkerConfiguration, templater: Templater, output: Output) extends Effector {
   override def perform(universe: Universe): Unit = {
     logger.info(s"Rendering universe to ${templater.getClass.getSimpleName}.")
-    val rendered = templater.render(universe).getBytes(Charsets.Utf8)
+    val rendered = templater.render(universe)
+
     logger.info(s"Writing template (${rendered.size} bytes) to ${output}.")
-    for (stream <- managed(new ByteArrayInputStream(rendered))) {
-      output.write(stream)
-    }
+    output.write(rendered)
   }
 }
 
@@ -28,16 +27,17 @@ object TemplateEffector {
   }
 
   trait Output {
-    def write(stream: InputStream)
+    def write(str: String)
   }
   object Output {
     case class Multi(outputs: Seq[Output]) extends Output {
-      override def write(stream: InputStream): Unit = outputs.foreach(o => o.write(stream))
+      override def write(str: String): Unit = outputs.foreach(o => o.write(str))
     }
 
     case class File(path: Path, permissions: Set[PosixFilePermission]) extends Output {
-      override def write(stream: InputStream): Unit = {
-        Files.copy(stream, path)
+      override def write(str: String): Unit = {
+        Files.deleteIfExists(path)
+        Files.write(path, str.getBytes(Charsets.Utf8))
         Chmod.chmod(path, permissions)
       }
     }
@@ -46,8 +46,8 @@ object TemplateEffector {
     }
 
     case class Stderr() extends Output {
-      override def write(stream: InputStream): Unit = {
-        ByteStreams.copy(stream, System.err)
+      override def write(str: String): Unit = {
+        System.err.print(str)
       }
     }
   }

@@ -1,9 +1,8 @@
 package com.edcanhack.spinal.extensions.haproxy.worker.effectors.templates
 
-import com.edcanhack.spinal.worker.effectors.TemplateEffector.Templater
 import com.edcanhack.spinal.commons.state.{HTTPRoutable, Universe}
-import com.edcanhack.spinal.extensions.haproxy.{Formatting, FrontendAddress}
-import com.edcanhack.spinal.extensions.haproxy.worker.effectors.templates.txt.main
+import com.edcanhack.spinal.extensions.haproxy.Formatting
+import com.edcanhack.spinal.worker.effectors.TemplateEffector.Templater
 
 case class HaproxyTemplater() extends Templater {
   /**
@@ -40,7 +39,7 @@ case class HaproxyTemplater() extends Templater {
 
   // TODO: investigate better templating solutions; Twirl destroys the linebreaks and makes the code unreadable.
   private def constructTemplate(httpRoutes: Map[Int, Seq[HTTPRoutable]]): String = {
-    import Formatting._
+    import com.edcanhack.spinal.extensions.haproxy.Formatting._
 
     val sb = new StringBuilder()
     var indent = 0
@@ -65,6 +64,15 @@ case class HaproxyTemplater() extends Templater {
     }
     append()
 
+    append("defaults")
+    indented {
+      append("mode http")
+      append("timeout connect 10000ms") // TODO: parameterize this
+      append("timeout client  50000ms") // TODO: parameterize this
+      append("timeout server  50000ms") // TODO: parameterize this
+    }
+    append()
+
     for(f <- httpRoutes) {
       append(s"## spinal: ${f}")
       append(s"frontend http-${f._1}")
@@ -72,17 +80,16 @@ case class HaproxyTemplater() extends Templater {
         append(s"bind *:${f._1}")
         append()
         for (r <- f._2) {
-          append(s"acl ${pad(hostAclName(r), 60)} hdr(host) -i ${r.host}")
-          r.path.foreach(p => {
-            append(s"acl ${pad(hostAclName(r), 60)} path_beg     ${p}")
-          })
+          val hostTest = s"hdr(host) -i ${r.host}"
+          val pathTest = if (r.path.isEmpty) "" else s"path_beg ${r.path.get}"
+
+          append(s"acl ${pad(hostAclName(r), 60)} ${hostTest}    ${pathTest}")
+
         }
         append()
+
         for (r <- f._2) {
-          r.path match {
-            case None =>            append(s"use_backend ${pad(routeName(r), 52)} if ${hostAclName(r)}")
-            case Some(p: String) => append(s"use_backend ${pad(routeName(r), 52)} if ${hostAclName(r)} and ${pathAclName(r)}")
-          }
+          append(s"use_backend ${pad(routeName(r), 52)} if ${hostAclName(r)}")
         }
       }
       append()
