@@ -11,15 +11,21 @@ import scala.concurrent.duration.{FiniteDuration, Duration}
  * Created by ed on 8/11/14.
  */
 trait PollingDiscoverer extends Discoverer {
+  import context._
+
   def pollingFrequency: FiniteDuration
 
   val behavior: Actor.Receive = {
     case Messages.Leader.Discoverer.StartDiscovery => {
       logger.info(s"Setting up a poll for every ${pollingFrequency.toMillis} ms.")
-      context.system.scheduler.schedule(Duration(1, TimeUnit.MILLISECONDS), pollingFrequency, self, Poll)
+      self ! Poll
     }
-    case Poll => discover()
+    case Poll => {
+      discover()
+      system.scheduler.scheduleOnce(pollingFrequency, self, Poll)
+    }
   }
+  override def receive = behavior orElse super.receive
 
   case object Poll
 }

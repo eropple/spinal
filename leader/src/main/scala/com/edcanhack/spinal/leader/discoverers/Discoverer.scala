@@ -24,7 +24,6 @@ trait Discoverer extends BaseActor[LeaderConfiguration] {
       HTTPRoutable.merge(hr)
     }
 
-
     Universe(httpRoutes = http)
   }
 
