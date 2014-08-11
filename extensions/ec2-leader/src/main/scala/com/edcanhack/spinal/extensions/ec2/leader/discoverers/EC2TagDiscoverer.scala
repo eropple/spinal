@@ -1,7 +1,9 @@
 package com.edcanhack.spinal.extensions.ec2.leader.discoverers
 
+import java.util.concurrent.TimeUnit
+
 import com.edcanhack.spinal.leader.config.LeaderConfiguration
-import com.edcanhack.spinal.leader.discoverers.Discoverer
+import com.edcanhack.spinal.leader.discoverers.{PollingDiscoverer, Discoverer}
 import com.amazonaws.services.ec2.AmazonEC2Client
 import scala.collection.JavaConversions._
 import com.edcanhack.spinal.commons.state.Routable
@@ -10,10 +12,13 @@ import com.amazonaws.auth.{DefaultAWSCredentialsProviderChain, AWSCredentialsPro
 import play.api.libs.json.Json
 import com.edcanhack.spinal.commons.Messages
 
+import scala.concurrent.duration.{Duration, FiniteDuration}
+
 
 class EC2TagDiscoverer(val config: LeaderConfiguration, val priority: Int,
+                       val pollingFrequency: FiniteDuration,
                        ec2Credentials: Option[AWSCredentialsProvider],
-                       val routingTagName: String, val dieOnFail: Boolean) extends Discoverer {
+                       val routingTagName: String, val dieOnFail: Boolean) extends PollingDiscoverer {
   private val credentialProvider = ec2Credentials getOrElse new DefaultAWSCredentialsProviderChain()
   protected val EC2 = new AmazonEC2Client(credentialProvider)
 
