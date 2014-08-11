@@ -1,10 +1,14 @@
 package com.edcanhack.spinal.extensions.haproxy.worker.effectors.templates
 
+import java.io.File
+
 import com.edcanhack.spinal.commons.state.{HTTPRoutable, Universe}
 import com.edcanhack.spinal.extensions.haproxy.Formatting
 import com.edcanhack.spinal.worker.effectors.TemplateEffector.Templater
 
-case class HaproxyTemplater(user: Option[String] = None, group: Option[String] = None) extends Templater {
+case class HaproxyTemplater(user: Option[String] = None,
+                            group: Option[String] = None,
+                            chroot: Option[File] = None) extends Templater {
   /**
    * Renders out an HAProxy template that represents the requested universe.
    *
@@ -62,12 +66,19 @@ case class HaproxyTemplater(user: Option[String] = None, group: Option[String] =
     indented {
       user.map(u => w(s"user ${u}"))
       group.map(g => w(s"group ${g}"))
+      chroot.map(c => w(s"chroot ${c}"))
+      w("log /dev/log	local0")
+      w("log /dev/log	local1 notice")
+      w("daemon")
     }
     w()
 
     w("defaults")
     indented {
+      w("log global")
       w("mode http")
+      w("option httplog")
+      w("option dontlognull")
       w("timeout connect 10000ms") // TODO: parameterize this
       w("timeout client  50000ms") // TODO: parameterize this
       w("timeout server  50000ms") // TODO: parameterize this
