@@ -4,7 +4,7 @@ import com.edcanhack.spinal.commons.state.{HTTPRoutable, Universe}
 import com.edcanhack.spinal.extensions.haproxy.Formatting
 import com.edcanhack.spinal.worker.effectors.TemplateEffector.Templater
 
-case class HaproxyTemplater() extends Templater {
+case class HaproxyTemplater(user: Option[String] = None, group: Option[String] = None) extends Templater {
   /**
    * Renders out an HAProxy template that represents the requested universe.
    *
@@ -45,7 +45,7 @@ case class HaproxyTemplater() extends Templater {
     var indent = 0
 
     def indentString(n: Int) = " " * (n * 2)
-    def append(str: => String = "") = sb.append(indentString(indent)).append(str).append("\n")
+    def w(str: => String = "") = sb.append(indentString(indent)).append(str).append("\n")
     def indented(block: => Unit) = {
       indent += 1
       block
@@ -54,58 +54,59 @@ case class HaproxyTemplater() extends Templater {
     def hostAclName(r: HTTPRoutable) = s"host::${Formatting.routeName(r)}"
     def pathAclName(r: HTTPRoutable) = s"path::${Formatting.routeName(r)}"
 
-    append("## HAPROXY CONFIG COURTESY OF SPINAL")
-    append("## file bugs at https://github.com/eropple/spinal")
-    append()
+    w("## HAPROXY CONFIG COURTESY OF SPINAL")
+    w("## file bugs at https://github.com/eropple/spinal")
+    w()
 
-    append("global")
+    w("global")
     indented {
-
+      user.map(u => w(s"user ${u}"))
+      group.map(g => w(s"group ${g}"))
     }
-    append()
+    w()
 
-    append("defaults")
+    w("defaults")
     indented {
-      append("mode http")
-      append("timeout connect 10000ms") // TODO: parameterize this
-      append("timeout client  50000ms") // TODO: parameterize this
-      append("timeout server  50000ms") // TODO: parameterize this
+      w("mode http")
+      w("timeout connect 10000ms") // TODO: parameterize this
+      w("timeout client  50000ms") // TODO: parameterize this
+      w("timeout server  50000ms") // TODO: parameterize this
     }
-    append()
+    w()
 
     for(f <- httpRoutes) {
-      append(s"## spinal: ${f}")
-      append(s"frontend http-${f._1}")
+      w(s"## spinal: ${f}")
+      w(s"frontend http-${f._1}")
       indented {
-        append(s"bind *:${f._1}")
-        append()
+        w(s"bind *:${f._1}")
+        w()
         for (r <- f._2) {
           val hostTest = s"hdr(host) -i ${r.host}"
           val pathTest = if (r.path.isEmpty) "" else s"path_beg ${r.path.get}"
 
-          append(s"acl ${pad(hostAclName(r), 60)} ${hostTest}    ${pathTest}")
+          w(s"acl ${pad(hostAclName(r), 60)} ${hostTest}    ${pathTest}")
 
         }
-        append()
+        w()
 
         for (r <- f._2) {
-          append(s"use_backend ${pad(routeName(r), 52)} if ${hostAclName(r)}")
+          w(s"use_backend ${pad(routeName(r), 52)} if ${hostAclName(r)}")
         }
       }
-      append()
+      w()
       for (r <- f._2) {
-        append(s"backend ${routeName(r)}")
+        w(s"backend ${routeName(r)}")
         indented {
           for(hc <- r.healthChecks) {
-            append(s"option httpchk      ${hc}")
+            w(s"option httpchk      ${hc}")
           }
           for(e <- r.endpoints.zipWithIndex) {
-            append(s"server server-${pad(e._2.toString, 5)} ${e._1.address}:${e._1.port}")
+            w(s"server server-${pad(e._2.toString, 5)} ${e._1.address}:${e._1.port}")
           }
         }
-        append()
+        w()
       }
-      append()
+      w()
     }
 
     sb.toString
