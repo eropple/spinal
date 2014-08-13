@@ -1,6 +1,6 @@
 package com.edcanhack.spinal.commons.state
 
-import scalaz._, Scalaz._
+import scala.util.Sorting
 
 case class Endpoint(address: String, port: Int)
 
@@ -39,5 +39,15 @@ object HTTPRoutable {
 
       HTTPRoutable(key._1, path, key._3, hc, t._2)
     }).toSeq
+  }
+}
+
+object HTTPRoutableOrdering extends Ordering[HTTPRoutable] {
+  override def compare(x: HTTPRoutable, y: HTTPRoutable): Int = {
+    var c = x.sourcePort.compareTo(y.sourcePort)
+    if (c != 0) return c
+    c = x.host.compareToIgnoreCase(y.host)
+    if (c != 0) return c
+    -(x.path.size.compare(y.path.size))
   }
 }

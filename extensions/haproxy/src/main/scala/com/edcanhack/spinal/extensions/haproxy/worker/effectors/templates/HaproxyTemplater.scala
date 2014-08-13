@@ -2,7 +2,7 @@ package com.edcanhack.spinal.extensions.haproxy.worker.effectors.templates
 
 import java.io.File
 
-import com.edcanhack.spinal.commons.state.{HTTPRoutable, Universe}
+import com.edcanhack.spinal.commons.state.{HTTPRoutableOrdering, HTTPRoutable, Universe}
 import com.edcanhack.spinal.extensions.haproxy.Formatting
 import com.edcanhack.spinal.worker.effectors.TemplateEffector.Templater
 
@@ -32,16 +32,17 @@ case class HaproxyTemplater(user: Option[String] = None,
 
     routes.foreach(r => {
       val key = r.sourcePort
-      val value = accum.get(key).getOrElse(Seq()) :+ r
+      val value = accum.getOrElse(key, Seq()) :+ r
 
       accum.put(key, value)
     })
 
-    accum.toMap
+    accum.map (t => (t._1, t._2.sorted(HTTPRoutableOrdering))).toMap
   }
 
 
   // TODO: investigate better templating solutions; Twirl destroys the linebreaks and makes the code unreadable.
+  // TODO: strip matched path segments when redirecting via URI paths.
   private def constructTemplate(httpRoutes: Map[Int, Seq[HTTPRoutable]]): String = {
     import com.edcanhack.spinal.extensions.haproxy.Formatting._
 
@@ -92,16 +93,16 @@ case class HaproxyTemplater(user: Option[String] = None,
         w(s"bind *:${f._1}")
         w()
         for (r <- f._2) {
-          val hostTest = s"hdr(host) -i ${r.host}"
-          val pathTest = if (r.path.isEmpty) "" else s"path_beg ${r.path.get}"
+          val hostTest = s"{ hdr(host) -i ${r.host} }"
+          val pathTest = if (r.path.isEmpty) "" else s"{ path_beg ${r.path.get} }"
 
-          w(s"acl ${pad(hostAclName(r), 60)} ${hostTest}    ${pathTest}")
-
+          //w(s"acl ${pad(hostAclName(r), 60)} ${hostTest}    ${pathTest}")
+          w(s"use_backend ${pad(routeName(r), 52)} if ${hostTest} ${pathTest}")
         }
         w()
 
         for (r <- f._2) {
-          w(s"use_backend ${pad(routeName(r), 52)} if ${hostAclName(r)}")
+//          w(s"acl ${pad(hostAclName(r), 60)} ${hostTest}    ${pathTest}")
         }
       }
       w()
