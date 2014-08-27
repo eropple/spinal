@@ -113,7 +113,7 @@ case class HaproxyTemplater(user: Option[String] = None,
             w(s"option httpchk      ${hc}")
           }
           r.path.map(p => {
-            w(s"reqrep ^([^\ ]*\ /)${p.replace("^/", "")} %>[/]?(.*)     \1\2")
+            w(s"reqrep ^([^\\ ]*\\ /)${p.replaceAll("^/", "")}[/]?(.*)     \\1\\2")
           })
           for(e <- r.endpoints.zipWithIndex) {
             w(s"server server-${pad(e._2.toString, 5)} ${e._1.address}:${e._1.port}")
