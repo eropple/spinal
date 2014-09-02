@@ -5,8 +5,8 @@ import com.edcanhack.spinal.worker.config.WorkerConfiguration
 
 class EchoingEffector(val config: WorkerConfiguration) extends Effector {
   def perform(universe: Universe): Unit = {
-    for (pair <- universe) {
-      logger.info(s"${pair._1} -> ${pair._2}")
+    for (r <- universe.httpRoutes) {
+      logger.info(s"${r.host}${r.path} @ ${r.sourcePort}: ${r.endpoints}, ${r.healthChecks}")
     }
   }
 }

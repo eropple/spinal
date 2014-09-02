@@ -2,8 +2,6 @@ package com.edcanhack.spinal.leader.config
 
 import com.edcanhack.spinal.commons.config._
 import com.edcanhack.spinal.commons.config.specs.LocatorSpec
-import com.edcanhack.spinal.commons.state.Universe
-import com.edcanhack.spinal.commons.state.Universe.NormalMerge
 import com.edcanhack.spinal.leader.config.specs.{DiscovererSpec, ElectorSpec, LeaderObserverSpec, PublisherSpec}
 
 import scala.collection.mutable.ListBuffer
@@ -40,7 +38,6 @@ trait LeaderConfiguration extends Configuration {
 }
 
 trait LeaderParametersBase extends ConfigurationParameters {
-  def universeMergeType: Universe.MergeType
 }
-case class LeaderParameters(universeMergeType: Universe.MergeType = NormalMerge)
+case class LeaderParameters()
   extends LeaderParametersBase

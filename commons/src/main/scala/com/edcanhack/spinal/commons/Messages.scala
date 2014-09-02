@@ -1,6 +1,6 @@
 package com.edcanhack.spinal.commons
 
-import com.edcanhack.spinal.commons.state.{Universe, Leader}
+import com.edcanhack.spinal.commons.state.{Routable, Universe, Leader}
 
 object Messages {
   object Locator {
@@ -30,7 +30,7 @@ object Messages {
 
     object Discoverer {
       case object StartDiscovery
-      case class Report(universe: Universe)
+      case class Report(routes: Seq[_ <: Routable])
     }
 
     object Publisher {

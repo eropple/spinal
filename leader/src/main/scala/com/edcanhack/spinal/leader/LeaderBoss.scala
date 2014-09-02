@@ -17,7 +17,7 @@ class LeaderBoss(val config: LeaderConfiguration) extends BaseActor[LeaderConfig
   def receive = {
     case Messages.Leader.Initialize => {
       config.elector.initializeElector(context, config)
-      context.actorOf(Props(classOf[LeaderObserverBoss], config), "observers") ! Messages.Leader.Boss.Initialize
+      context.actorOf(Props(classOf[LeaderObserverBoss], config), "observers")
     }
     case Messages.Leader.GoInactive => {
       if (isActive) {
@@ -28,8 +28,8 @@ class LeaderBoss(val config: LeaderConfiguration) extends BaseActor[LeaderConfig
       }
     }
     case Messages.Leader.IsActiveLeader => {
-      context.actorOf(Props(classOf[DiscovererBoss], config), "discoverers") ! Messages.Leader.DiscovererBoss.Initialize
-      context.actorOf(Props(classOf[PublisherBoss], config), "publishers") ! Messages.Leader.Boss.Initialize
+      context.actorOf(Props(classOf[DiscovererBoss], config), "discoverers")
+      context.actorOf(Props(classOf[PublisherBoss], config), "publishers")
 
       isActive = true
     }

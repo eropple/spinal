@@ -11,6 +11,7 @@ import com.typesafe.scalalogging.slf4j.StrictLogging
 object Main extends StrictLogging {
   def main(argTokens: Array[String]) = {
     logger.info("Application starting.")
+    logger.info(s"Classpath: ${System.getProperty("java.class.path")}")
 
     val config: SingletonConfiguration = Configuration.load[SingletonConfiguration]() match {
       case err: ConfigErrors => {

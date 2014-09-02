@@ -8,7 +8,7 @@ import com.edcanhack.spinal.worker.config.WorkerConfiguration
 trait Effector extends BaseActor[WorkerConfiguration]{
   def receive = {
     case Messages.Worker.Effector.PerformEffect(u: Universe) => {
-      logger.info(s"Universe of ${u.size} routes received; performing effect.")
+      logger.info(s"Universe of ${u.httpRoutes.size} HTTP routes received; performing effect.")
       perform(u)
     }
   }
